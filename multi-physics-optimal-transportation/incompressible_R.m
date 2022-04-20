@@ -1,24 +1,28 @@
-function v  = incompressible_R(u,alpha)
+function v  = incompressible_R(u)
+% 
+    v = zeros([u.dim 3]);
+    divx = ( div_x(u) );
     
-    % div_u = div(u);
-    % mynorm = @(a)norm(a(:));
-    % v = alpha * interp_adj(div_u);
-    p = div(u);
-    v = u;
-    d = u.dim;
+    constx = repmat([4;-4],[floor( (u.dim(1)-1)/2 ) u.dim(2:3)]);
+    if mod(u.dim(1),2)==0
+        constx = cat( 1, repmat(2,[1 u.dim(2:3)]), constx, repmat(4,[1 u.dim(2:3)]) );
+    else
+        constx = cat( 1, repmat(2,[1 u.dim(2:3)]), constx );
+    end
+    
+    for i = 1:u.dim(1)
+        v(i,:,:,1) = sum((divx(i:-1:1,:,:)).*constx(1:i,:,:),1);
+    end
+    
+    consty = repmat([4 -4],[u.dim(1) floor((u.dim(2)-1)/2) u.dim(3)]);
+    if mod(u.dim(1),2)==0
+        consty = cat( 2, repmat(2,[u.dim(1) 1 u.dim(3)]), consty, repmat(4,[u.dim(1) 1 u.dim(3)]) );
+    else
+        consty = cat( 2, repmat(2,[u.dim(1) 1 u.dim(3)]), consty );
+    end
 
-    v.M{1}(2:(end-1),:,:) = v.M{1}(2:(end-1),:,:) - alpha * diff(p,[],1)*d(1);
-    v.M{2}(:,2:(end-1),:) = v.M{2}(:,2:(end-1),:) - alpha * diff(p,[],2)*d(2);
-    v.M{3}(:,:,2:(end-1)) = v.M{3}(:,:,2:(end-1)) - alpha * diff(p,[],3)*d(3);
+    for i = 1:u.dim(2)
+        v(:,i,:,2) = sum((divx(:,i:-1:1,:)).*consty(:,1:i,:),2);
+    end
+end
     
-  
-    
-    lx = ones(length(u.dim),1);
-    d                         = u.dim;
-    du                        = div(u,lx);
-    v                         = u;
-    %% 3-D %%
-    p                       = poisson3d_Neumann(-du,lx(1),lx(2),lx(3));
-    v.M{1}(2:(end-1),:,:)   = v.M{1}(2:(end-1),:,:) - diff(p,[],1)*d(1)/lx(1);
-    v.M{2}(:,2:(end-1),:)   = v.M{2}(:,2:(end-1),:) - diff(p,[],2)*d(2)/lx(2);
-    v.M{3}(:,:,2:(end-1))   = v.M{3}(:,:,2:(end-1)) - diff(p,[],3)*d(3)/lx(3);

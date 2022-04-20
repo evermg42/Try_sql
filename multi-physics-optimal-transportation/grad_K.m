@@ -1,4 +1,5 @@
 function u = grad_K(x,w)
+    %K¶Ô(rho,m1,m2)ÇóÌÝ¶È
     d = size(x);
     m1 = x(:,:,:,1);
     m2 = x(:,:,:,2);
