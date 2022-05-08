@@ -18,10 +18,16 @@ d = [N,P,Q];
 gaussian = @(a,b,sigma)exp( -((X-a).^2+(Y-b).^2)/(2*sigma^2) );
 obstacle=zeros(d);
 
-sigma =  .08;
+sigma =  .05;
 rho = .0; % minimum density value
-f0 = ( rho + gaussian(.2,.6,sigma) + gaussian(.8,.4,sigma) );
-f1 = ( rho + gaussian(.6,.2,sigma) + gaussian(.4,.8,sigma) );
+f0 = ( rho + gaussian(.2,.6,sigma) + gaussian(.8,.4,sigma) + gaussian(.5,.5,sigma) );
+f1 = ( rho + gaussian(.6,.2,sigma) + gaussian(.4,.8,sigma) + gaussian(.45,.6,sigma));
+
+
+f0 = double(imread('shape_1.png'));
+f1 = double(imread('shape_65.png'));
+f0 = f0(:,:,1)/255;
+f1 = f1(:,:,1)/255;
 epsilon=min(f0(:));
 J = @(w)sum3(  sum(w(:,:,:,1:2).^2,4) ./ max( w(:,:,:,3),max(epsilon,1e-10) )  );
 
@@ -34,7 +40,7 @@ finit = (1-t) .* repmat(f0, [1 1 Q+1]) + t .* repmat(f1, [1 1 Q+1]);
 % finit(:,:,2,:) = zeros(size(finit(:,:,2,:)));
 
 %% niter !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-niter = 100;
+niter =1000;
 lambda = 1000; lambda2 = 1000;
 gamma = 1./230;
 alphaJ= 1; % should be in [0;1];
@@ -71,9 +77,10 @@ Jlist = [];
 listw = [];
 divxx = [];
 gradv = [];
+divxv = [];
 %% Main
 
-Type = "translate";
+Type = "incompressible";
 la = 1.98;
 R = 0;
 tic
@@ -161,8 +168,8 @@ for ii=1:niter
                     g = grad_K_w(x,w);
                     forward2 = lambda2*g;
                     forward2v = alpha*R;
-                    [v,w]  = proxS( v - tau*forward2v, w - tau*forward2, gamma );
-                    fprintf("g = %d R = %d div(v)=%d\n",mynorm(g(:)),mynorm([R.M{1}(:);R.M{2}(:)]),mynorm(div(v)));
+                    [v,w]  = proxS( v - tauv*forward2v, w - tau*forward2, gamma );
+%                     fprintf("g = %d R = %d div(v)=%d\n",mynorm(g(:)),mynorm([R.M{1}(:);R.M{2}(:)]),mynorm(div(v)));
                 case "rigid"
                     R = rigid_R(v);
                     g = grad_K_w(x,w);
@@ -180,12 +187,12 @@ for ii=1:niter
             
             normw = mean(abs(w-old_w),'all');
         end
-        
-        
-            
-        
+
     end
     fprintf("(v1 v2 w1 w2): %d %d %d %d\n",mean(abs(v.M{1}),'all'),mean(abs(v.M{2}),'all'),mean(abs(w(:,:,:,1)),'all'),mean(abs(w(:,:,:,2)),'all') );
+    tttt = div_staggered(v);
+    fprintf("divxv = %d\n",tttt);
+    divxv = [divxv tttt];
     tttt = grad_staggered(v);
     fprintf("gradv = %d\n",tttt);
     gradv = [gradv tttt];
@@ -224,6 +231,15 @@ contour(x(:,:,floor(end*2/3),3))
 subplot(2,2,4)
 contour(x(:,:,end,3))
 
+figure(4)
+subplot(2,2,1)
+contour(x(:,:,1,3))
+subplot(2,2,2)
+contour(x(:,:,floor(end/3),3))
+subplot(2,2,3)
+contour(x(:,:,floor(end*2/3),3))
+subplot(2,2,4)
+contour(x(:,:,end,3))
 
 ww = tau*forward2;
 figure(5)
@@ -248,3 +264,28 @@ subplot(2,2,4)
 quiver(ww(:,:,end,2),ww(:,:,end,1))
 
 
+figure(7)
+subplot(3,4,1)
+contour(x(:,:,1,3))
+subplot(3,4,2)
+contour(x(:,:,4,3))
+subplot(3,4,3)
+contour(x(:,:,7,3))
+subplot(3,4,4)
+contour(x(:,:,10,3))
+subplot(3,4,5)
+contour(x(:,:,13,3))
+subplot(3,4,6)
+contour(x(:,:,16,3))
+subplot(3,4,7)
+contour(x(:,:,19,3))
+subplot(3,4,8)
+contour(x(:,:,22,3))
+subplot(3,4,9)
+contour(x(:,:,25,3))
+subplot(3,4,10)
+contour(x(:,:,28,3))
+subplot(3,4,11)
+contour(x(:,:,30,3))
+subplot(3,4,12)
+contour(x(:,:,32,3))
