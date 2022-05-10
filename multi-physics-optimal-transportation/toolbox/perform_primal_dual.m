@@ -32,6 +32,10 @@ function [x,R,y] = perform_primal_dual(x, K,  KS, ProxFS, ProxG, options)
 %
 %   Copyright (c) 2010 Gabriel Peyre
 
+
+
+
+
 options.null = 0;
 report       = getoptions(options, 'report', @(x)0);
 niter        = getoptions(options, 'niter', 100);
@@ -67,7 +71,12 @@ for i = 1:niter
     progressbar(i,niter);
   end
   % record energies
+  tt = sum(size(x));
+  if tt == 2
   R(i)       = report(x,y);
+  else
+  R = 0;
+  end
   
   % update
   xold       = x;
