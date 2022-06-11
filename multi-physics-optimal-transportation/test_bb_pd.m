@@ -32,7 +32,7 @@ obstacle=zeros(N,P,Q);
 
 %%
 % Load the data.
-test = 'shape';
+test = 'gaussian2';
 %test = 'obsession';
 %test = 'mixture';
 
@@ -51,7 +51,11 @@ switch test
         f0 = normalize( rho + gaussian(.25,.25,sigma) );
         f1 = normalize( rho + gaussian(.75,.75,sigma) );
         epsilon=min(f0(:));
-
+    case 'gaussian2'
+        sigma = .07;
+        f0 = normalize( rho + gaussian(.2,.4,sigma) + gaussian(.8,.6,sigma) );
+        f1 = normalize( rho + gaussian(.4,.2,sigma) + gaussian(.6,.8,sigma) );
+        epsilon=min(f0(:));
     case 'obsession'
         sigma = 0.0354;
         rho = 1e-4; % minimum density value
@@ -117,8 +121,8 @@ f_init = (1-t) .* repmat(f0, [1 1 Q+1]) + t .* repmat(f1, [1 1 Q+1]);
 % linear operator and adjoint
 add_constraints = 1;
 
-K  = @(X)pd_operator(X, +1);
-KS = @(X)pd_operator(X, -1);
+K  = @(X)pd_operator_1(X, +1);
+KS = @(X)pd_operator_1(X, -1);  %!!!!!!!!!!!
 L = 1;
 if 0
     % test for operator norm
@@ -145,7 +149,8 @@ end
 
 % prox operators
 proxJeps  = @(V,gamma)proxJ(V,gamma,epsilon,alpha,obstacle);
-proxF    = @(X,gamma)proxJeps(X+b,gamma)-b;
+proxF    = @(X,gamma)proxJeps(X,gamma);
+% proxF    = @(X,gamma)proxJeps(X,gamma);
 proxFS   = compute_dual_prox(proxF);
 proxG    = @(U,gamma)pd_div_proj(U);
 % functionals
@@ -162,7 +167,7 @@ U0 = staggered(d); U0.M{3} = f_init;
 options.theta = 1.;
 options.sigma=85;
 options.tau = .99/(options.sigma*L);
-options.niter = 200;
+options.niter = 1000;
 mymin = @(x)min(min(min(x(:,:,:,3))));
 
 options.report = @(U,V)struct( 'J', J(interp(U)), 'Constr', mynorm(div(U)), 'Min', mymin(interp(U)));%,...%
@@ -193,10 +198,47 @@ V   = interp(U);
 imageplot( mat2cell(U.M{3}(:,:,sel), N, P, ones(20,1)) , '', 2,3);axis equal
  end
 
- figure;
+figure;
 subplot(2,1,1);
-plot(Jlist(10:end), '-'); axis tight;
+semilogx(Jlist(10:end), '-'); axis tight;
 title('J');
 subplot(2,1,2);
 plot((Constr(10:end)), '.-'); axis tight;
 title('div=0 violation');
+
+% X=interp(x1);
+% figure(3);
+% subplot(2,2,1)
+% quiver(X(:,:,1,2),X(:,:,1,1))
+% subplot(2,2,2)
+% quiver(X(:,:,floor(end/3),2),X(:,:,floor(end/3),1))
+% subplot(2,2,3)
+% quiver(X(:,:,floor(end*2/3),2),X(:,:,floor(end*2/3),1))
+% subplot(2,2,4)
+% quiver(X(:,:,end,2),X(:,:,end,1))
+X = interp(U);
+figure(2);
+subplot(3,4,1)
+contour(X(:,:,1,3))
+subplot(3,4,2)
+contour(X(:,:,4,3))
+subplot(3,4,3)
+contour(X(:,:,7,3))
+subplot(3,4,4)
+contour(X(:,:,10,3))
+subplot(3,4,5)
+contour(X(:,:,13,3))
+subplot(3,4,6)
+contour(X(:,:,16,3))
+subplot(3,4,7)
+contour(X(:,:,19,3))
+subplot(3,4,8)
+contour(X(:,:,22,3))
+subplot(3,4,9)
+contour(X(:,:,25,3))
+subplot(3,4,10)
+contour(X(:,:,28,3))
+subplot(3,4,11)
+contour(X(:,:,30,3))
+subplot(3,4,12)
+contour(X(:,:,32,3))

@@ -14,4 +14,4 @@ function ProxFS = compute_dual_prox(ProxF)
 %
 %   Copyright (c) 2010 Gabriel Peyre
 
-ProxFS = @(y,sigma)y-sigma*ProxF(y/sigma,1/sigma);
+ProxFS = @(y,sigma)y-sigma*ProxF((1/sigma)*y,1/sigma);

@@ -80,12 +80,52 @@ for i = 1:niter
   
   % update
   xold       = x;
+  
+  tt = sigma*K(x1);
+  [sum(y(:,:,1,3),'all') sum(tt(:,:,1,3),'all')]
   y          = ProxFS(y + sigma*K(x1),sigma);
   
+  out1 = [sum(y(:,:,1,3),'all') sum(y(:,:,2,3),'all')]
   x          = ProxG(x - tau*KS(y),tau);
-
+  
+  ttt = x - KS(y);
+  out2 = [sum(ttt.M{3}(:,:,1),'all') sum(ttt.M{3}(:,:,2),'all')]
   x1         = x + theta*(x-xold);
-
+% X=interp(x1);
+% figure(3);
+% subplot(2,2,1)
+% quiver(X(:,:,1,2),X(:,:,1,1))
+% subplot(2,2,2)
+% quiver(X(:,:,floor(end/3),2),X(:,:,floor(end/3),1))
+% subplot(2,2,3)
+% quiver(X(:,:,floor(end*2/3),2),X(:,:,floor(end*2/3),1))
+% subplot(2,2,4)
+% quiver(X(:,:,end,2),X(:,:,end,1))
+% figure(2);
+% subplot(3,4,1)
+% contour(X(:,:,1,3))
+% subplot(3,4,2)
+% contour(X(:,:,4,3))
+% subplot(3,4,3)
+% contour(X(:,:,7,3))
+% subplot(3,4,4)
+% contour(X(:,:,10,3))
+% subplot(3,4,5)
+% contour(X(:,:,13,3))
+% subplot(3,4,6)
+% contour(X(:,:,16,3))
+% subplot(3,4,7)
+% contour(X(:,:,19,3))
+% subplot(3,4,8)
+% contour(X(:,:,22,3))
+% subplot(3,4,9)
+% contour(X(:,:,25,3))
+% subplot(3,4,10)
+% contour(X(:,:,28,3))
+% subplot(3,4,11)
+% contour(X(:,:,30,3))
+% subplot(3,4,12)
+% contour(X(:,:,32,3))
 
 %% To see the evolution of errors  
 

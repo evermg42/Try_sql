@@ -1,4 +1,4 @@
-function v = div(u,lx)
+function v = div_1(u,lx)
 
 %
 % div - divergence operator
@@ -19,14 +19,4 @@ for k = 1:length(d)
   v   = v + diff(u.M{k},[],k)*d(k)/lx(k);
 end
 
-
-
-
-
-
-
-return
-
-
-
-
+end

@@ -18,15 +18,20 @@ w1       = reshape(w(:,:,:,1),    [prod(vs(1:(end-1))) 1]);
 w2       = reshape(w(:,:,:,2),    [prod(vs(1:(end-1))) 1]);
 absw2    = w1.^2 + w2.^2;
 mTv      = m1.*w1+m2.*w2;
-
 %Newton's method for finding the polynomial root
 
-A = 1 + 4 * tau * lambda * ( 1 + .5*absw2 )  + 4 * tau^2 * lambda^2 * (1+absw2);
+A = 1 + 4 * tau * lambda * ( (1+.5*absw2)  + tau * lambda * (1+absw2) );
 B = 2* tau - f0 + 4*tau^2*lambda - 4*tau*lambda*f0 -4*tau^2*lambda^2*f0 ...
     -2*tau*lambda*(mTv)-4*tau^2*lambda^2*(mTv) ...
     +4*tau^2*lambda*absw2+2*tau^3*lambda^2*absw2;
 C = tau*( tau-2*f0-4*tau*lambda*(f0+mTv) + 2*tau^2*lambda*absw2 );
 D = - 0.5*tau* ( (m1.^2 + m2.^2) + 2 * tau*f0 );
+
+% A = ones(length(f0),1);
+% B = 2* tau - f0;
+% C = tau*( tau-2*f0);
+% D = - 0.5*tau* ( (m1.^2 + m2.^2) + 2 * tau*f0 );
+
 P = [A,B,C,D];
 % roots
 R          = poly_root_new(P')';
@@ -36,5 +41,6 @@ I          = f<epsilon;
 f(I)       = epsilon;
 I=obstacle>0;
 f(I)       = epsilon;
-m          = (m0 + 2*lambda*tau * [f0 f0].*m0) ./ repmat(1+2*lambda*tau+tau./f, [1 (d-1)]);
+% m          = (m0 + 2*lambda*tau * [f0 f0].*m0) ./ repmat(1+2*lambda*tau+tau./f, [1 (d-1)]);
+m          = m0 ./ repmat(1+tau./f, [1 (d-1)]);
 V          = reshape([m f], vs);
